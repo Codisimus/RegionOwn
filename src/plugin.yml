@@ -1,0 +1,53 @@
+name: RegionOwn
+main: com.codisimus.plugins.regionown.RegionOwn
+version: 0.0.1
+author: Codisimus
+website: www.codisimus.com
+description: Area protection based on polygonal regions
+startup: postworld
+softdepend: [Vault]
+commands:
+  region:
+    description: Used to own the current Chunk that you are in
+    usage: /<command> help
+permissions:
+  regionown.save:
+    description: Needed to save unowned Regions (/region save)
+  regionown.tools:
+    description: Needed to modify Region selections (/region thaw, /region clear, /region cut, /region replace, /region fill)
+  regionown.buy:
+    description: Needed to buy Regions (/region buy, /region sell, /region list, /region sellall)
+  regionown.backup:
+    description: Needed to backup a Region to a snapshot (/region backup)
+  regionown.revert:
+    description: Needed to revert from snapshots (/region revert)
+  regionown.addon.blockpvp:
+    description: Needed to buy the BlockPvP Add-on (/region buy blockpvp)
+  regionown.addon.blockpve:
+    description: Needed to buy the BlockPvE Add-on (/region buy blockpve)
+  regionown.addon.blockexplosions:
+    description: Needed to buy the BlockExplosions Add-on (/region buy blockexplosions)
+  regionown.addon.lockchests:
+    description: Needed to buy the LockChests Add-on (/region buy lockchests)
+  regionown.addon.lockdoors:
+    description: Needed to buy the LockDoors Add-on (/region buy lockdoors)
+  regionown.addon.disablebuttons:
+    description: Needed to buy the DisableButtons Add-on (/region buy disablebuttons)
+  regionown.addon.disablepistons:
+    description: Needed to buy the DisablePistons Add-on (/region buy disablepistons)
+  regionown.addon.alarm:
+    description: Needed to buy the Alarm Add-on (/region buy alarm)
+  regionown.addon.heal:
+    description: Needed to buy the Heal Add-on (/region buy heal)
+  regionown.addon.feed:
+    description: Needed to buy the Feed Add-on (/region buy feed)
+  regionown.info:
+    description: Needed to see who the owner and Co-owners are of the current Chunk (/region info)
+  regionown.coowner:
+    description: Needed to add a Co-owner to your Regions (/region coowner)
+  regionown.free:
+    description: Buy Regions/Add-ons free of charge
+  regionown.admin:
+    description: Edit other Players' Regions
+  regionown.mustowntobuild:
+    description: Restricts Players from building anywhere they don't own
