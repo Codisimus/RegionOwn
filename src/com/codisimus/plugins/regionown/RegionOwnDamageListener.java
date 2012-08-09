@@ -13,7 +13,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
  * @author Codisimus
  */
 public class RegionOwnDamageListener implements Listener {
-    @EventHandler (ignoreCancelled=true, priority = EventPriority.HIGHEST)
+    @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onEntityDamage(EntityDamageByEntityEvent event) {
         if (event.isCancelled())
             return;

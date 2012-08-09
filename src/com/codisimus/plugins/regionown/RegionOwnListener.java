@@ -25,7 +25,8 @@ import org.bukkit.event.vehicle.VehicleDestroyEvent;
 public class RegionOwnListener implements Listener {
     /* Anti-Drop while reverting */
     static LinkedList<Region> reverting = new LinkedList<Region>();
-    @EventHandler (ignoreCancelled=true, priority = EventPriority.HIGHEST)
+    
+    @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onItemSpawn(ItemSpawnEvent event) {
         Location location = event.getLocation();
         for (Region region: reverting)
@@ -41,7 +42,7 @@ public class RegionOwnListener implements Listener {
      * 
      * @param event The BlockPlaceEvent that occurred
      */
-    @EventHandler (ignoreCancelled=true, priority = EventPriority.HIGHEST)
+    @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onBlockPlace(BlockPlaceEvent event) {
         if (!RegionOwn.canBuild(event.getPlayer(), event.getBlock()))
             event.setCancelled(true);
@@ -52,7 +53,7 @@ public class RegionOwnListener implements Listener {
      * 
      * @param event The BlockBreakEvent that occurred
      */
-    @EventHandler (ignoreCancelled=true, priority = EventPriority.HIGHEST)
+    @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onBlockBreak(BlockBreakEvent event) {
         if (!RegionOwn.canBuild(event.getPlayer(), event.getBlock()))
             event.setCancelled(true);
@@ -63,7 +64,7 @@ public class RegionOwnListener implements Listener {
      * 
      * @param event The SignChangeEvent that occurred
      */
-    @EventHandler (ignoreCancelled=true, priority = EventPriority.HIGHEST)
+    @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onSignChange(SignChangeEvent event) {
         if (!RegionOwn.canBuild(event.getPlayer(), event.getBlock()))
             event.setCancelled(true);
@@ -74,7 +75,7 @@ public class RegionOwnListener implements Listener {
      * 
      * @param event The BlockIgniteEvent that occurred
      */
-    @EventHandler (ignoreCancelled=true, priority = EventPriority.HIGHEST)
+    @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onBlockIgnite(BlockIgniteEvent event) {
         if (!RegionOwn.canBuild(event.getPlayer(), event.getBlock()))
             event.setCancelled(true);
@@ -85,7 +86,7 @@ public class RegionOwnListener implements Listener {
      * 
      * @param event The BlockSpreadEvent that occurred
      */
-    @EventHandler(ignoreCancelled=true, priority = EventPriority.HIGHEST)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onBlockSpread(BlockSpreadEvent event) {
         if (event.getSource().getType() == Material.FIRE && !RegionOwn.canBuild(null, event.getBlock()))
             event.setCancelled(true);
@@ -96,7 +97,7 @@ public class RegionOwnListener implements Listener {
      * 
      * @param event The BlockBurnEvent that occurred
      */
-    @EventHandler(ignoreCancelled=true, priority=EventPriority.HIGHEST)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onBlockBurn(BlockBurnEvent event) {
         if (!RegionOwn.canBuild(null, event.getBlock()))
             event.setCancelled(true);
@@ -107,7 +108,7 @@ public class RegionOwnListener implements Listener {
      * 
      * @param event The PlayerEggThrowEvent that occurred
      */
-    @EventHandler (ignoreCancelled=true, priority = EventPriority.HIGHEST)
+    @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onEggThrow(PlayerEggThrowEvent event) {
         Player player = event.getPlayer();
         if (!RegionOwn.canBuild(player, player.getTargetBlock(null, 10)))
@@ -119,7 +120,7 @@ public class RegionOwnListener implements Listener {
      * 
      * @param event The PlayerBucketEmptyEvent that occurred
      */
-    @EventHandler (ignoreCancelled=true, priority = EventPriority.HIGHEST)
+    @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event) {
         if (!RegionOwn.canBuild(event.getPlayer(), event.getBlockClicked().getRelative(event.getBlockFace())))
             event.setCancelled(true);
@@ -130,7 +131,7 @@ public class RegionOwnListener implements Listener {
      * 
      * @param event The PlayerBucketFillEvent that occurred
      */
-    @EventHandler (ignoreCancelled=true, priority = EventPriority.HIGHEST)
+    @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onPlayerBucketFill(PlayerBucketFillEvent event) {
         if (!RegionOwn.canBuild(event.getPlayer(), event.getBlockClicked()))
             event.setCancelled(true);
@@ -141,7 +142,7 @@ public class RegionOwnListener implements Listener {
      * 
      * @param event The PaintingBreakByEntityEvent that occurred
      */
-    @EventHandler (ignoreCancelled=true, priority = EventPriority.HIGHEST)
+    @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onPaintingBreak(PaintingBreakByEntityEvent event) {
         Player player = null;
         Entity entity = event.getRemover();
@@ -157,7 +158,7 @@ public class RegionOwnListener implements Listener {
      * 
      * @param event The VehicleDamageEvent that occurred
      */
-    @EventHandler (ignoreCancelled=true, priority = EventPriority.HIGHEST)
+    @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onVehicleDamage(VehicleDamageEvent event) {
         Player player = null;
         Entity entity = event.getAttacker();
@@ -173,7 +174,7 @@ public class RegionOwnListener implements Listener {
      * 
      * @param event The VehicleDestroyEvent that occurred
      */
-    @EventHandler (ignoreCancelled=true, priority = EventPriority.HIGHEST)
+    @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onVehicleDestroy(VehicleDestroyEvent event) {
         Player player = null;
         Entity entity = event.getAttacker();

@@ -21,7 +21,7 @@ public class RegionOwnMovementListener implements Listener {
     private static LinkedList<Player> feeding = new LinkedList<Player>();
     private static HashMap<Player, Region> inRegion = new HashMap<Player, Region>();
     
-    @EventHandler (ignoreCancelled=true, priority = EventPriority.MONITOR)
+    @EventHandler (ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onPlayerMove(PlayerMoveEvent event) {
         //Return if the Player did not move between Blocks
         Block block = event.getTo().getBlock();

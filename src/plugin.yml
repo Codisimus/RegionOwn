@@ -1,6 +1,6 @@
 name: RegionOwn
 main: com.codisimus.plugins.regionown.RegionOwn
-version: 0.0.1
+version: 0.1.0
 author: Codisimus
 website: www.codisimus.com
 description: Area protection based on polygonal regions
@@ -42,7 +42,7 @@ permissions:
   regionown.addon.feed:
     description: Needed to buy the Feed Add-on (/region buy feed)
   regionown.info:
-    description: Needed to see who the owner and Co-owners are of the current Chunk (/region info)
+    description: Needed to see who the owner and Co-owners are of a Region (/region info)
   regionown.coowner:
     description: Needed to add a Co-owner to your Regions (/region coowner)
   regionown.free:

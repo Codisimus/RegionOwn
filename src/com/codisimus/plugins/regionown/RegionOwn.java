@@ -126,7 +126,13 @@ public class RegionOwn extends JavaPlugin {
         RegionOwnMovementListener.scheduleFeeder();
         RegionSelector.animateSelections();
         
-        System.out.println("RegionOwn "+this.getDescription().getVersion()+" is enabled!");
+        Properties version = new Properties();
+        try {
+            version.load(this.getResource("version.properties"));
+        }
+        catch (Exception ex) {
+        }
+        System.out.println("RegionOwn "+this.getDescription().getVersion()+" (Build "+version.getProperty("Build")+") is enabled!");
     }
     
     /**
@@ -294,7 +300,10 @@ public class RegionOwn extends JavaPlugin {
                     region.heal = Boolean.parseBoolean(p.getProperty("RegenerateHealth"));
                     region.feed = Boolean.parseBoolean(p.getProperty("RegenerateHunger"));
                     
-                    ownedRegions.put(region.name, region);
+                    if (region.owner == null)
+                        regions.put(region.name, region);
+                    else
+                        ownedRegions.put(region.name, region);
                 }
                 catch (Exception loadFailed) {
                     System.err.println("[RegionOwn] Failed to load "+name);

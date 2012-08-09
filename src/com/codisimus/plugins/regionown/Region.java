@@ -21,7 +21,7 @@ public class Region {
     private int width;
     private int length;
     int height;
-    BitSet bitSet = new BitSet();
+    public BitSet bitSet = new BitSet();
     
     public RegionOwner owner;
     public LinkedList<String> coOwners = new LinkedList<String>();
@@ -141,8 +141,6 @@ public class Region {
         polygon.addPoint(firstBlock.getX(), firstBlock.getZ());
         polygon.invalidate();
         
-        World w = RegionOwn.server.getWorld(world);
-        
         //Construct the BitSet for the Polygon
         int index = 0;
         for (int x = x1; x <= x2; x++)
@@ -176,22 +174,23 @@ public class Region {
         World w = RegionOwn.server.getWorld(world);
         
         for (Region region: RegionOwn.getRegions())
-            if (x1 >= region.x1 && x1 <= region.x2 || x2 >= region.x1 && x2 <= region.x2 && /* if x1 or x2 is within the x range of the Region */
-                    y1 >= region.y1 && y1 <= region.y2 || y2 >= region.y1 && y2 <= region.y2 && /* && if y1 or y2 is within the y range of the Region */
-                    z1 >= region.z1 && z1 <= region.z2 || z2 >= region.z1 && z2 <= region.z2) /* && if z1 or z2 is within the z range of the Region */
-                if (world.equals(region.world)) {
-                    int index = 0;
-                    for (int x = x1; x <= x2; x++)
-                        for (int z = z1; z <= z2; z++) {
-                            if (bitSet.get(index))
-                                if (region.contains(w.getBlockAt(x, region.y1, z).getLocation())) {
-                                    bitSet.flip(index);
-                                    trimmed = true;
+            if ((x1 >= region.x1 && x1 <= region.x2 || x2 >= region.x1 && x2 <= region.x2) || (region.x1 >= x1 && region.x1 <= x2 || region.x2 >= x1 && region.x2 <= x2)) /* if x1 or x2 is within the x range of the Region */
+                if ((y1 >= region.y1 && y1 <= region.y2 || y2 >= region.y1 && y2 <= region.y2) || (region.y1 >= y1 && region.y1 <= y2 || region.y2 >= y1 && region.y2 <= y2)) /* && if y1 or y2 is within the y range of the Region */
+                    if ((z1 >= region.z1 && z1 <= region.z2 || z2 >= region.z1 && z2 <= region.z2) || (region.z1 >= z1 && region.z1 <= z2 || region.z2 >= z1 && region.z2 <= z2)) /* && if z1 or z2 is within the z range of the Region */
+                        if (world.equals(region.world)) {
+                            int index = 0;
+                            for (int x = x1; x <= x2; x++)
+                                for (int z = z1; z <= z2; z++) {
+                                   if (bitSet.get(index))
+                                       for (int y = y1; y <= y2; y++)
+                                            if (region.contains(w.getBlockAt(x, y, z).getLocation())) {
+                                              bitSet.flip(index);
+                                             trimmed = true;
+                                              break;
+                                            }
+                                  index++;
                                 }
-                            
-                            index++;
                         }
-                }
         
         return trimmed;
     }
@@ -212,6 +211,9 @@ public class Region {
      * @return true if the given player is the Owner of this Region
      */
     public boolean isOwner(String player) {
+        if (owner == null)
+            return false;
+        
         return owner.name.equals(player);
     }
 
@@ -590,6 +592,17 @@ public class Region {
     
     public void save() {
         RegionOwn.saveRegion(this);
+    }
+    
+    public int[] toIntArray() {
+        int[] intArray = new int[6];
+        intArray[0] = x1;
+        intArray[1] = z1;
+        intArray[2] = x2;
+        intArray[3] = z2;
+        intArray[4] = y1;
+        intArray[5] = y2;
+        return intArray;
     }
     
     @Override

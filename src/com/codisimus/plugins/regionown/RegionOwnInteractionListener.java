@@ -13,7 +13,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
  * @author Codisimus
  */
 public class RegionOwnInteractionListener implements Listener {
-    @EventHandler (ignoreCancelled=true, priority = EventPriority.HIGHEST)
+    @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onPlayerInteract(PlayerInteractEvent event) {
         //Return if the Event was arm flailing
         Action action = event.getAction();

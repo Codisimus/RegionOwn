@@ -45,7 +45,7 @@ public class RegionSelector implements Listener {
     }
     
     /**
-     * Listens for Players Selected Blocks
+     * Listens for Players Selecting Blocks
      * 
      * @param event The PlayerInteractEvent that occurred
      */

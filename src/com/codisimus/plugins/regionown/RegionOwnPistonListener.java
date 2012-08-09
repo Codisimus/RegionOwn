@@ -14,7 +14,7 @@ import org.bukkit.event.block.BlockPistonRetractEvent;
  * @author Codisimus
  */
 public class RegionOwnPistonListener implements Listener {
-    @EventHandler (ignoreCancelled=true, priority = EventPriority.HIGHEST)
+    @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onPistonExtend(BlockPistonExtendEvent event) {
         List<Block> blocks = event.getBlocks();
         for (Block block: blocks) {
@@ -33,7 +33,7 @@ public class RegionOwnPistonListener implements Listener {
         }
     }
     
-    @EventHandler (ignoreCancelled=true, priority = EventPriority.HIGHEST)
+    @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onPistonRetract(BlockPistonRetractEvent event) {
         if (event.isSticky()) {
             Region region = RegionOwn.findRegion(event.getBlock().getRelative(event.getDirection(), 2).getLocation());
