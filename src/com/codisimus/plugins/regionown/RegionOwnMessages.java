@@ -15,6 +15,7 @@ public class RegionOwnMessages {
     public static String adminSold;
     public static String charge;
     public static String refund;
+    public static String accessDenied;
     public static String regionNotFound = "§4Region §6<Name>§4 was not found";
     
     /**
@@ -30,6 +31,7 @@ public class RegionOwnMessages {
         adminSold = format(adminSold);
         charge = format(charge);
         refund = format(refund);
+        accessDenied = format(accessDenied);
         regionNotFound = format(regionNotFound);
     }
     

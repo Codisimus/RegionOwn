@@ -28,8 +28,9 @@ public class RegionOwnPistonListener implements Listener {
         int size = blocks.size();
         if (size != 0) {
             Region region = RegionOwn.findRegion(blocks.get(size - 1).getRelative(event.getDirection()).getLocation());
-            if (region != null && region.disablePistons)
+            if (region != null && region.disablePistons) {
                 event.setCancelled(true);
+            }
         }
     }
     
@@ -37,8 +38,9 @@ public class RegionOwnPistonListener implements Listener {
     public void onPistonRetract(BlockPistonRetractEvent event) {
         if (event.isSticky()) {
             Region region = RegionOwn.findRegion(event.getBlock().getRelative(event.getDirection(), 2).getLocation());
-            if (region != null && region.disablePistons)
+            if (region != null && region.disablePistons) {
                 event.setCancelled(true);
+            }
         }
     }
 }

@@ -29,9 +29,11 @@ public class RegionOwnListener implements Listener {
     @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onItemSpawn(ItemSpawnEvent event) {
         Location location = event.getLocation();
-        for (Region region: reverting)
-            if (region.contains(location))
+        for (Region region: reverting) {
+            if (region.contains(location)) {
                 event.setCancelled(true);
+            }
+        }
     }
     
     
@@ -44,8 +46,9 @@ public class RegionOwnListener implements Listener {
      */
     @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onBlockPlace(BlockPlaceEvent event) {
-        if (!RegionOwn.canBuild(event.getPlayer(), event.getBlock()))
+        if (!RegionOwn.canBuild(event.getPlayer(), event.getBlock())) {
             event.setCancelled(true);
+        }
     }
     
     /**
@@ -55,8 +58,9 @@ public class RegionOwnListener implements Listener {
      */
     @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onBlockBreak(BlockBreakEvent event) {
-        if (!RegionOwn.canBuild(event.getPlayer(), event.getBlock()))
+        if (!RegionOwn.canBuild(event.getPlayer(), event.getBlock())) {
             event.setCancelled(true);
+        }
     }
 
     /**
@@ -66,8 +70,9 @@ public class RegionOwnListener implements Listener {
      */
     @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onSignChange(SignChangeEvent event) {
-        if (!RegionOwn.canBuild(event.getPlayer(), event.getBlock()))
+        if (!RegionOwn.canBuild(event.getPlayer(), event.getBlock())) {
             event.setCancelled(true);
+        }
     }
 
     /**
@@ -77,8 +82,9 @@ public class RegionOwnListener implements Listener {
      */
     @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onBlockIgnite(BlockIgniteEvent event) {
-        if (!RegionOwn.canBuild(event.getPlayer(), event.getBlock()))
+        if (!RegionOwn.canBuild(event.getPlayer(), event.getBlock())) {
             event.setCancelled(true);
+        }
     }
     
     /**
@@ -88,8 +94,9 @@ public class RegionOwnListener implements Listener {
      */
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onBlockSpread(BlockSpreadEvent event) {
-        if (event.getSource().getType() == Material.FIRE && !RegionOwn.canBuild(null, event.getBlock()))
+        if (event.getSource().getType() == Material.FIRE && !RegionOwn.canBuild(null, event.getBlock())) {
             event.setCancelled(true);
+        }
     }
 
     /**
@@ -99,8 +106,9 @@ public class RegionOwnListener implements Listener {
      */
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onBlockBurn(BlockBurnEvent event) {
-        if (!RegionOwn.canBuild(null, event.getBlock()))
+        if (!RegionOwn.canBuild(null, event.getBlock())) {
             event.setCancelled(true);
+        }
     }
 
     /**
@@ -111,8 +119,9 @@ public class RegionOwnListener implements Listener {
     @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onEggThrow(PlayerEggThrowEvent event) {
         Player player = event.getPlayer();
-        if (!RegionOwn.canBuild(player, player.getTargetBlock(null, 10)))
+        if (!RegionOwn.canBuild(player, player.getTargetBlock(null, 10))) {
             event.setHatching(false);
+        }
     }
     
     /**
@@ -122,8 +131,9 @@ public class RegionOwnListener implements Listener {
      */
     @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event) {
-        if (!RegionOwn.canBuild(event.getPlayer(), event.getBlockClicked().getRelative(event.getBlockFace())))
+        if (!RegionOwn.canBuild(event.getPlayer(), event.getBlockClicked().getRelative(event.getBlockFace()))) {
             event.setCancelled(true);
+        }
     }
 
     /**
@@ -133,8 +143,9 @@ public class RegionOwnListener implements Listener {
      */
     @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onPlayerBucketFill(PlayerBucketFillEvent event) {
-        if (!RegionOwn.canBuild(event.getPlayer(), event.getBlockClicked()))
+        if (!RegionOwn.canBuild(event.getPlayer(), event.getBlockClicked())) {
             event.setCancelled(true);
+        }
     }
     
     /**
@@ -146,11 +157,13 @@ public class RegionOwnListener implements Listener {
     public void onPaintingBreak(PaintingBreakByEntityEvent event) {
         Player player = null;
         Entity entity = event.getRemover();
-        if (entity instanceof Player)
-            player = (Player)entity;
+        if (entity instanceof Player) {
+            player = (Player) entity;
+        }
         
-        if (!RegionOwn.canBuild(player, event.getPainting().getLocation().getBlock()))
+        if (!RegionOwn.canBuild(player, event.getPainting().getLocation().getBlock())) {
             event.setCancelled(true);
+        }
     }
     
     /**
@@ -162,11 +175,13 @@ public class RegionOwnListener implements Listener {
     public void onVehicleDamage(VehicleDamageEvent event) {
         Player player = null;
         Entity entity = event.getAttacker();
-        if (entity instanceof Player)
-            player = (Player)entity;
+        if (entity instanceof Player) {
+            player = (Player) entity;
+        }
         
-        if (!RegionOwn.canBuild(player, event.getVehicle().getLocation().getBlock()))
+        if (!RegionOwn.canBuild(player, event.getVehicle().getLocation().getBlock())) {
             event.setCancelled(true);
+        }
     }
 
     /**
@@ -178,10 +193,12 @@ public class RegionOwnListener implements Listener {
     public void onVehicleDestroy(VehicleDestroyEvent event) {
         Player player = null;
         Entity entity = event.getAttacker();
-        if (entity instanceof Player)
-            player = (Player)entity;
+        if (entity instanceof Player) {
+            player = (Player) entity;
+        }
         
-        if (!RegionOwn.canBuild(player, event.getVehicle().getLocation().getBlock()))
+        if (!RegionOwn.canBuild(player, event.getVehicle().getLocation().getBlock())) {
             event.setCancelled(true);
+        }
     }
 }

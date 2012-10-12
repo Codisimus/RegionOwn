@@ -22,8 +22,9 @@ public class RegionOwnLoggerListener implements Listener {
         String player = event.getPlayer().getName();
         
         //Log the Player as being online if they have a RegionOwner Object that represents them
-        if (RegionOwn.findOwner(player) != null)
+        if (RegionOwn.findOwner(player) != null) {
             logAsSeen(player);
+        }
     }
     
     /**
@@ -36,8 +37,9 @@ public class RegionOwnLoggerListener implements Listener {
         String player = event.getPlayer().getName();
         
         //Log the Player as being online if they have a RegionOwner Object that represents them
-        if (RegionOwn.findOwner(player) != null)
+        if (RegionOwn.findOwner(player) != null) {
             logAsSeen(player);
+        }
     }
     
     /**

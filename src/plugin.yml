@@ -1,6 +1,6 @@
 name: RegionOwn
 main: com.codisimus.plugins.regionown.RegionOwn
-version: 0.1.0
+version: 0.2.1
 author: Codisimus
 website: www.codisimus.com
 description: Area protection based on polygonal regions
@@ -15,7 +15,7 @@ permissions:
     description: Needed to save unowned Regions (/region save)
   regionown.tools:
     description: Needed to modify Region selections (/region thaw, /region clear, /region cut, /region replace, /region fill)
-  regionown.buy:
+  regionown.own:
     description: Needed to buy Regions (/region buy, /region sell, /region list, /region sellall)
   regionown.backup:
     description: Needed to backup a Region to a snapshot (/region backup)
@@ -35,6 +35,8 @@ permissions:
     description: Needed to buy the DisableButtons Add-on (/region buy disablebuttons)
   regionown.addon.disablepistons:
     description: Needed to buy the DisablePistons Add-on (/region buy disablepistons)
+  regionown.addon.denyaccess:
+    description: Needed to buy the DenyAccess Add-on (/region buy denyaccess)
   regionown.addon.alarm:
     description: Needed to buy the Alarm Add-on (/region buy alarm)
   regionown.addon.heal:

@@ -17,10 +17,10 @@ public class RegionOwnExplosionListener implements Listener {
     public void onEntityExplode(EntityExplodeEvent event) {
         Iterator<Block> itr = event.blockList().iterator();
         while (itr.hasNext()) {
-            
             Region region = RegionOwn.findRegion(itr.next().getLocation());
-            if (region != null && region.blockExplosions)
+            if (region != null && region.blockExplosions) {
                 itr.remove();
+            }
         }
     }
 }

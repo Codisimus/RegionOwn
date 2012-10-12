@@ -22,6 +22,7 @@ public class Econ {
     static double lockDoors;
     static double disableButtons;
     static double disablePistons;
+    static double denyAccess;
     static double alarm;
     static double heal;
     static double feed;
@@ -72,8 +73,9 @@ public class Econ {
             economy.withdrawPlayer(name, amount);
         }
         
-        if (amount > 0)
+        if (amount > 0) {
             player.sendMessage(RegionOwnMessages.charge.replace("<amount>", format(amount)));
+        }
         return true;
     }
     
@@ -85,9 +87,7 @@ public class Econ {
     public static void sell(Player player, Region region) {
         String name = player.getName();
         String price = format(getSellPrice(name, region));
-        
         sell(name, region);
-        
         player.sendMessage(RegionOwnMessages.sell.replace("<amount>", price));
     }
     
@@ -97,8 +97,9 @@ public class Econ {
      * @param name The name of the Player who is selling
      */
     public static void sell(String name, Region region) {
-        if (economy != null)
+        if (economy != null) {
             economy.depositPlayer(name, getSellPrice(name, region));
+        }
     }
     
     /**
@@ -113,8 +114,9 @@ public class Econ {
 
         //Notify the Seller
         Player seller = RegionOwn.server.getPlayer(owner);
-        if (seller != null)
+        if (seller != null) {
             seller.sendMessage(RegionOwnMessages.adminSold.replace("<amount>", price));
+        }
         
         admin.sendMessage(RegionOwnMessages.adminSell.replace("<amount>", price));
     }
@@ -128,8 +130,9 @@ public class Econ {
     public static void refund(Player player, double amount) {
         String name = player.getName();
         
-        if (economy != null)
+        if (economy != null) {
             economy.depositPlayer(name, amount);
+        }
         
         player.sendMessage(RegionOwnMessages.refund.replace("<amount>", format(amount)));
     }
@@ -141,10 +144,9 @@ public class Econ {
      * @return The calculated BuyPrice
      */
     public static double getBuyPrice(String player, Region region) {
-        if (RegionOwn.hasPermission(player, "free"))
-            return 0;
-        
-        return buyPrice * region.size();
+        return RegionOwn.hasPermission(player, "free")
+                ? 0
+                : buyPrice * region.size();
     }
     
     /**
@@ -165,23 +167,24 @@ public class Econ {
      */
     public static double getBuyPrice(AddOn addon) {
         double price;
-        
         switch (addon) {
-            case BLOCKPVP: price = blockPvP; break;
-            case BLOCKPVE: price = blockPvE; break;
-            case BLOCKEXPLOSIONS: price = blockExplosions; break;
-            case LOCKCHESTS: price = lockChests; break;
-            case LOCKDOORS: price = lockDoors; break;
-            case DISABLEBUTTONS: price = disableButtons;  break;
-            case DISABLEPISTONS: price = disablePistons; break;
-            case ALARM: price = alarm; break;
-            case HEAL: price = heal; break;
-            case FEED: price = feed; break;
-            default: price = -2; break;
+        case BLOCKPVP: price = blockPvP; break;
+        case BLOCKPVE: price = blockPvE; break;
+        case BLOCKEXPLOSIONS: price = blockExplosions; break;
+        case LOCKCHESTS: price = lockChests; break;
+        case LOCKDOORS: price = lockDoors; break;
+        case DISABLEBUTTONS: price = disableButtons;  break;
+        case DISABLEPISTONS: price = disablePistons; break;
+        case DENYACCESS: price = denyAccess; break;
+        case ALARM: price = alarm; break;
+        case HEAL: price = heal; break;
+        case FEED: price = feed; break;
+        default: price = -2; break;
         }
         
-        if (price == -1)
+        if (price == -1) {
             price = 0;
+        }
         
         return price;
     }
@@ -203,9 +206,8 @@ public class Econ {
      * @return The String of the amount + currency name
      */
     public static String format(double amount) {
-        if (economy == null)
-            return "free";
-        
-        return economy.format(amount).replace(".00", "");
+        return economy == null
+                ? "free"
+                : economy.format(amount).replace(".00", "");
     }
 }

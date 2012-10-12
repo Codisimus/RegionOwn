@@ -53,33 +53,35 @@ public class RegionSelector implements Listener {
     public void onSelectBlock(PlayerInteractEvent event) {
         //Return if the Player is not selecting or they are in a disabled World
         Player player = event.getPlayer();
-        if (!selections.containsKey(player) || !RegionOwn.enabledInWorld(player.getWorld()))
+        if (!selections.containsKey(player) || !RegionOwn.enabledInWorld(player.getWorld())) {
             return;
+        }
         
         //Determine which Block was selected
         Block block;
         switch (event.getAction()) {
-            case LEFT_CLICK_BLOCK: block = event.getClickedBlock(); break; //The clicked Block
-            case RIGHT_CLICK_BLOCK: block = event.getClickedBlock().getRelative(event.getBlockFace()); break; //The clicked BlockFace
-            case LEFT_CLICK_AIR: block = player.getLocation().getBlock(); break; //The Player's Location
-            case RIGHT_CLICK_AIR: block = player.getLocation().getBlock().getRelative(0, 2, 0); break; //Above the Player's head
-            default: return; 
+        case LEFT_CLICK_BLOCK: block = event.getClickedBlock(); break; //The clicked Block
+        case RIGHT_CLICK_BLOCK: block = event.getClickedBlock().getRelative(event.getBlockFace()); break; //The clicked BlockFace
+        case LEFT_CLICK_AIR: block = player.getLocation().getBlock(); break; //The Player's Location
+        case RIGHT_CLICK_AIR: block = player.getLocation().getBlock().getRelative(0, 2, 0); break; //Above the Player's head
+        default: return; 
         }
         
-        //Cancel the event (no destroying blocks in creative mode)
-        event.setCancelled(true);
+        event.setCancelled(true); //No destroying blocks while selecting
         
         //Notify if the Block is already in a Region
         Region region = RegionOwn.findRegion(block.getLocation());
-        if (region != null)
+        if (region != null) {
             player.sendMessage("§4That Block is already in a Region, if purchased your selection will be trimmed");
+        }
         
         LinkedList<Block> selection = selections.get(player);
-        if (selection.contains(block))
+        if (selection.contains(block)) {
             endSelection(player);
-        else
+        } else {
             //Add the new Block to the Player's selection
             selections.get(player).add(block);
+        }
     }
     
     /**
@@ -122,10 +124,10 @@ public class RegionSelector implements Listener {
         LinkedList<Block> list = selections.get(player);
         Region region;
         switch (list.size()) {
-            case 0: //fall through
-            case 1: player.sendMessage("§4A selection must contain 2 Blocks for a Cubiod or 3+ for a Polygonal Region"); return;
-            case 2: region = new Region(list.getFirst(), list.getLast()); break;
-            default: region = new Region(list); break;
+        case 0: //Fall through
+        case 1: player.sendMessage("§4A selection must contain 2 Blocks for a Cubiod or 3+ for a Polygonal Region"); return;
+        case 2: region = new Region(list.getFirst(), list.getLast()); break;
+        default: region = new Region(list); break;
         }
         
         //Set the name of the Region as the Players name so snapshots can be easily found
@@ -139,10 +141,12 @@ public class RegionSelector implements Listener {
         //Display Selection command options
         player.sendMessage("§5Region Selected! (§6"+region.size()+"§5 blocks)");
         player.sendMessage("§2/"+RegionOwnCommand.command+" buy§b Purchase the Region for "+Econ.format(Econ.getBuyPrice(player.getName(), region)));
-        if (RegionOwn.hasPermission(player, "save"))
+        if (RegionOwn.hasPermission(player, "save")) {
             player.sendMessage("§2/"+RegionOwnCommand.command+" save§b Save the Region for backing up or selection later");
-        if (RegionOwn.hasPermission(player, "tools"))
+        }
+        if (RegionOwn.hasPermission(player, "tools")) {
             player.sendMessage("§2/"+RegionOwnCommand.command+" help tools§b View a list of Region Tools");
+        }
     }
     
     /**
@@ -152,8 +156,7 @@ public class RegionSelector implements Listener {
      * @return The Player's selection or null if the Player does not have a selection
      */
     public static Region getSelection(Player player) {
-        Region region = regions.get(player);
-        return region;
+        return regions.get(player);
     }
     
     /**
@@ -164,13 +167,14 @@ public class RegionSelector implements Listener {
     	RegionOwn.server.getScheduler().scheduleSyncRepeatingTask(RegionOwn.plugin, new Runnable() {
             @Override
     	    public void run() {
-                for (LinkedList<Block> list: selections.values())
+                for (LinkedList<Block> list: selections.values()) {
                     for (Block block: list) {
                         //Play smoke effect
                         World world = block.getWorld();
                         Location location = block.getLocation();
                         world.playEffect(location, Effect.SMOKE, 4);
                     }
+                }
     	    }
     	}, 0L, 1L);
     }

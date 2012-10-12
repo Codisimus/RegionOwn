@@ -15,32 +15,38 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 public class RegionOwnDamageListener implements Listener {
     @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onEntityDamage(EntityDamageByEntityEvent event) {
-        if (event.isCancelled())
+        if (event.isCancelled()) {
             return;
+        }
         
         //Return if the Enitity damaged is not a Player
         Entity wounded = event.getEntity();
-        if (!(wounded instanceof Player))
+        if (!(wounded instanceof Player)) {
             return;
+        }
         
         //Return if the Event was not within a Region
         Region region = RegionOwn.findRegion(wounded.getLocation());
-        if (region == null)
+        if (region == null) {
             return;
+        }
 
         Entity attacker = event.getDamager();
         if (attacker instanceof Player) { /* PvP */
             //Return if the Player is suicidal
-            if (attacker.equals(wounded))
+            if (attacker.equals(wounded)) {
                 return;
+            }
             
             //Cancel the Event if PvP protection is enabled
-            if (Econ.blockPvP != -2 && region.blockPvP)
+            if (Econ.blockPvP != -2 && region.blockPvP) {
                 event.setCancelled(true);
-        }
-        else /* PvE */
+            }
+        } else { /* PvE */
             //Cancel the Event if PvE protection is enabled
-            if (Econ.blockPvE != -2 && region.blockPvE)
+            if (Econ.blockPvE != -2 && region.blockPvE) {
                 event.setCancelled(true);
+            }
+        }
     }
 }

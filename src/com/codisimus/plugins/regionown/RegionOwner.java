@@ -34,9 +34,9 @@ public class RegionOwner {
      */
     public void sendMessage(String msg) {
         Player player = RegionOwn.server.getPlayer(name);
-        if (player != null)
+        if (player != null) {
             player.sendMessage(msg);
-        else if (RegionOwn.pm.isPluginEnabled("TextPlayer")) {
+        } else if (RegionOwn.pm.isPluginEnabled("TextPlayer")) {
             User user = TextPlayer.findUser(name);
             user.sendText(msg);
         }
