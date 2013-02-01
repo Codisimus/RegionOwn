@@ -1,6 +1,6 @@
 name: RegionOwn
 main: com.codisimus.plugins.regionown.RegionOwn
-version: 0.2.1
+version: 0.2.3
 author: Codisimus
 website: www.codisimus.com
 description: Area protection based on polygonal regions
@@ -13,8 +13,12 @@ commands:
 permissions:
   regionown.save:
     description: Needed to save unowned Regions (/region save)
+  regionown.mobregion:
+    description: Needed to make a Mob Region (/region mobregion)
   regionown.tools:
     description: Needed to modify Region selections (/region thaw, /region clear, /region cut, /region replace, /region fill)
+  regionown.selectbiome:
+    description: Needed to select an entire Biome (/region select biome)
   regionown.own:
     description: Needed to buy Regions (/region buy, /region sell, /region list, /region sellall)
   regionown.backup:

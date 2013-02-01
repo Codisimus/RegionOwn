@@ -13,7 +13,7 @@ import org.bukkit.event.entity.EntityExplodeEvent;
  * @author Codisimus
  */
 public class RegionOwnExplosionListener implements Listener {
-    @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    @EventHandler (ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onEntityExplode(EntityExplodeEvent event) {
         Iterator<Block> itr = event.blockList().iterator();
         while (itr.hasNext()) {

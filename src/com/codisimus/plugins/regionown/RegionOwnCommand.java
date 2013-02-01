@@ -18,32 +18,22 @@ import org.bukkit.entity.Player;
 
 /**
  * Executes Player Commands
- * 
+ *
  * @author Codisimus
  */
 public class RegionOwnCommand implements CommandExecutor {
     public static String command = "region";
     static EnumSet<Material> clearIDs;
-    static EnumSet<Material> nonOpaques = EnumSet.of(Material.AIR, Material.SAPLING, Material.LEAVES, Material.GLASS, 
-            Material.POWERED_RAIL, Material.DETECTOR_RAIL, Material.WEB, Material.LONG_GRASS, Material.DEAD_BUSH,
-            Material.PISTON_EXTENSION, Material.PISTON_MOVING_PIECE, Material.YELLOW_FLOWER, Material.RED_ROSE,
-            Material.BROWN_MUSHROOM, Material.TORCH, Material.FIRE, Material.REDSTONE_WIRE, Material.CROPS,
-            Material.SIGN_POST, Material.WOODEN_DOOR, Material.LADDER, Material.RAILS, Material.WALL_SIGN, Material.LEVER,
-            Material.STONE_PLATE, Material.IRON_DOOR_BLOCK, Material.WOOD_PLATE, Material.REDSTONE_TORCH_OFF,
-            Material.REDSTONE_TORCH_ON, Material.STONE_BUTTON, Material.CACTUS, Material.SUGAR_CANE_BLOCK, Material.FENCE,
-            Material.PORTAL, Material.CAKE_BLOCK, Material.DIODE_BLOCK_OFF, Material.DIODE_BLOCK_ON, Material.TRAP_DOOR,
-            Material.IRON_FENCE, Material.THIN_GLASS, Material.PUMPKIN_STEM, Material.MELON_STEM, Material.VINE,
-            Material.FENCE_GATE, Material.WATER_LILY, Material.NETHER_FENCE, Material.NETHER_WARTS);
     private static enum Action {
-        HELP, SEL, SELECT, DONE, SAVE, TNT, BIO, BIOME,
-        CLEAR, THAW, REPLACE, CUT, GROW, FILL, BACKUP,
-        REVERT, UNDO, BUY, SELL, NAME, EXPAND, LIST,
-        INFO, COOWNER, SELLALL
+        HELP, SEL, SELECT, DONE, SAVE, MOBREGION, TNT,
+        BIO, BIOME, CLEAR, THAW, REPLACE, CUT, GROW,
+        FILL, BACKUP, REVERT, UNDO, BUY, SELL, NAME,
+        EXPAND, LIST, INFO, COOWNER, SELLALL
     }
-    
+
     /**
      * Listens for ChunkOwn commands to execute them
-     * 
+     *
      * @param sender The CommandSender who may not be a Player
      * @param command The command that was executed
      * @param alias The alias that the sender used
@@ -56,44 +46,48 @@ public class RegionOwnCommand implements CommandExecutor {
         if (!(sender instanceof Player)) {
             return true;
         }
-        
+
         Player player = (Player) sender;
-        
+
         //Cancel if the Player is in a disabled World
         if (!RegionOwn.enabledInWorld(player.getWorld())) {
             player.sendMessage("§4RegionOwn is disabled in your current World");
             return true;
         }
-        
+
         //Display help page if the Player did not add any arguments
         if (args.length == 0) {
             sendHelp(player);
             return true;
         }
-        
+
         Action action;
-        
+
         try {
             action = Action.valueOf(args[0].toUpperCase());
         } catch (IllegalArgumentException notEnum) {
             sendHelp(player);
             return true;
         }
-        
+
         switch (action) {
         /* Region Selection */
         case SEL: //Fall through
         case SELECT:
             if (RegionOwn.hasPermission(player, "own") || RegionOwn.hasPermission(player, "save") || RegionOwn.hasPermission(player, "tools")) {
                 if (args.length == 2) {
-                    Region region = RegionOwn.findRegion(args[1]);
-                    if (region == null) {
-                        player.sendMessage(RegionOwnMessages.regionNotFound.replace("<name>", args[1]));
-                    } else if (!region.isCoOwner(player)) {
-                        player.sendMessage(RegionOwnMessages.doNotOwn);
+                    if (args[1].equals("biome")) {
+                        RegionSelector.selectBiome(player);
                     } else {
-                        RegionSelector.setSelection(player, region);
-                        player.sendMessage("§5Region §6" + region.name + "§5 has been selected");
+                        Region region = RegionOwn.findRegion(args[1]);
+                        if (region == null) {
+                            player.sendMessage(RegionOwnMessages.regionNotFound.replace("<name>", args[1]));
+                        } else if (!region.isCoOwner(player)) {
+                            player.sendMessage(RegionOwnMessages.doNotOwn);
+                        } else {
+                            RegionSelector.setSelection(player, region);
+                            player.sendMessage("§5Region §6" + region.name + "§5 has been selected");
+                        }
                     }
                 } else {
                     RegionSelector.startSelection(player);
@@ -145,7 +139,7 @@ public class RegionOwnCommand implements CommandExecutor {
                             for (int z = region.z1; z <= region.z2; z++) {
                                 if (region.bitSet.get(index)) {
                                     Block block = world.getHighestBlockAt(x, z);
-                                    while (nonOpaques.contains(block.getType())) {
+                                    while (block.getType().isOccluding()) {
                                         block = block.getRelative(BlockFace.DOWN);
                                     }
                                     int surface = block.getLocation().getBlockY();
@@ -219,6 +213,35 @@ public class RegionOwnCommand implements CommandExecutor {
             }
             return true;
 
+        case MOBREGION:
+            //Cancel if the Player does not have permission to use the command
+            if (!RegionOwn.hasPermission(player, "mobregion")) {
+                player.sendMessage(RegionOwnMessages.permission);
+                return true;
+            }
+
+            switch (args.length) {
+            case 2:
+                if (args[1].equals("list")) {
+                    listMobRegions(player);
+                } else {
+                    sendHelp(player);
+                }
+                break;
+            case 3:
+                if (args[1].equals("add")) {
+                    addMobRegion(player, args[1]);
+                } else if (args[1].equals("remove")) {
+                    removeMobRegion(player, args[1]);
+                } else {
+                    sendHelp(player);
+                }
+                break;
+            default:
+                sendHelp(player);
+                break;
+            }
+            return true;
 
         /* Region Tools */
         case TNT:
@@ -295,7 +318,7 @@ public class RegionOwnCommand implements CommandExecutor {
                             index++;
                         }
                     }
-                    
+
                     for (Chunk chunk: needsUpdate) {
                         world.refreshChunk(chunk.getX(), chunk.getZ());
                     }
@@ -434,7 +457,7 @@ public class RegionOwnCommand implements CommandExecutor {
                 case 1:
                     materialSet = EnumSet.copyOf(clearIDs);
                     break;
-                    
+
                 case 2:
                     if (args[1].equals("all")) {
                         materialSet = EnumSet.allOf(Material.class);
@@ -557,7 +580,7 @@ public class RegionOwnCommand implements CommandExecutor {
                     for (int z = region.z1; z <= region.z2; z++) {
                         if (region.bitSet.get(index)) {
                             Block block = world.getHighestBlockAt(x, z);
-                            while (nonOpaques.contains(block.getType())) {
+                            while (block.getType().isOccluding()) {
                                 block = block.getRelative(BlockFace.DOWN);
                             }
 
@@ -632,7 +655,7 @@ public class RegionOwnCommand implements CommandExecutor {
                     }
                     player.sendMessage("§6" + amount + "§5 Blocks have been set to §6" + material.name());
                     return true;
-                    
+
                 default:
                     sendHelp(player);
                     return true;
@@ -789,7 +812,7 @@ public class RegionOwnCommand implements CommandExecutor {
                 return true;
 
             default: break;
-            } 
+            }
 
         case SELL:
             switch (args.length) {
@@ -876,7 +899,7 @@ public class RegionOwnCommand implements CommandExecutor {
 
             default: break;
             }
-            
+
         case HELP:
             if (args.length == 2) {
                 if (args[1].equals("addons")) {
@@ -895,15 +918,66 @@ public class RegionOwnCommand implements CommandExecutor {
 
         default: break;
         }
-        
+
         sendHelp(player);
         return true;
     }
-    
+
+    /**
+     * Adds the selected RegionOwn Region as a Mob Region
+     *
+     * @param player The Player who has a Region selected
+     * @param name The name of the Mob Region
+     */
+    public static void addMobRegion(Player player, String name) {
+        if (RegionSelector.isSelecting(player)) {
+            RegionSelector.endSelection(player);
+        }
+
+        if (!RegionSelector.hasSelection(player)) {
+            player.sendMessage("You must first select a Region");
+            return;
+        }
+
+        Region region = RegionSelector.getSelection(player);
+        region.name = name;
+
+        RegionOwn.mobRegions.put(name, region);
+        player.sendMessage("§6" + name + "§5 has been removed as a Mob Region");
+        region.save();
+    }
+
+    /**
+     * Removes the specified Mob Region
+     *
+     * @param player The Player removing the Region
+     * @param name The name of the Mob Region
+     */
+    public static void removeMobRegion(Player player, String name) {
+        RegionOwn.removeRegion(RegionOwn.mobRegions.remove(name));
+        player.sendMessage("§6" + name + "§5 has been removed as a Mob Region");
+    }
+
+    /**
+     * Lists all Mob Regions
+     *
+     * @param player The Player to send the list to
+     */
+    public static void listMobRegions(Player player) {
+        String list = "§5Current Mob Regions: §6";
+
+        //Concat each PhatLoot
+        for (String string : RegionOwn.mobRegions.keySet()) {
+            list += string + "§0, ";
+        }
+
+        player.sendMessage(list.substring(0, list.length() - 2));
+    }
+
     /**
      * Gives ownership of the selected Region to the Player
      * Regions are trimmed if they overlap an existing OwnedRegion
-     * 
+     *
      * @param player The Player buying the Region
      */
     public static void buy(Player player, String regionName) {
@@ -912,27 +986,27 @@ public class RegionOwnCommand implements CommandExecutor {
             player.sendMessage(RegionOwnMessages.permission);
             return;
         }
-        
+
         if (RegionOwn.findRegion(regionName) != null) {
             player.sendMessage("Region "+regionName+" already exists");
             return;
         }
-        
+
         if (RegionSelector.isSelecting(player)) {
             RegionSelector.endSelection(player);
         }
-        
+
         if (!RegionSelector.hasSelection(player)) {
             player.sendMessage("§4You do not have a Region Selected so no purchase was made");
             return;
         }
-        
+
         Region region = RegionSelector.getSelection(player);
         if (region.owner != null) {
             player.sendMessage("§4The selected Region is already owned");
             return;
         }
-        
+
         int pretrim = region.size();
         if (region.trim()) {
             player.sendMessage("§4The selection overlaps with a preexisting Region, Your Selection has been trimmed from §6"
@@ -940,21 +1014,21 @@ public class RegionOwnCommand implements CommandExecutor {
             player.sendMessage("§4If you still wish to purchase the Region please repeat the buy command");
             return;
         }
-        
+
         region.name = regionName;
         region.setOwner(player.getName());
-        
+
         //Charge the Player only if they don't have the 'regionown.free' node
         if (!Econ.buy(player, region)) {
             return;
         }
-        
+
         RegionOwn.addRegion(region);
     }
-    
+
     /**
      * Gives the Add-on to the Region
-     * 
+     *
      * @param player The Player buying the Add-on
      */
     public static void buyAddOn(Player player, String regionName, AddOn addOn) {
@@ -963,31 +1037,31 @@ public class RegionOwnCommand implements CommandExecutor {
             player.sendMessage(RegionOwnMessages.regionNotFound.replace("<name>", regionName));
             return;
         }
-        
+
         //Cancel if the Player does not have permission to buy the Add-on
         if (!RegionOwn.hasPermission(player, addOn)) {
             player.sendMessage(RegionOwnMessages.permission);
             return;
         }
-        
+
         //Cancel if the Player already has the Add-on
         if (region.hasAddOn(addOn)) {
             player.sendMessage("§4You already have that Add-on enabled");
             return;
         }
-        
+
         //Cancel if the Player could not afford the transaction
         if (!Econ.charge(player, Econ.getBuyPrice(addOn))) {
             return;
         }
-        
+
         region.setAddOn(player, addOn, true);
         region.save();
     }
-    
+
     /**
      * Removes the given Add-on from the Region
-     * 
+     *
      * @param player The Player selling the Add-on
      */
     public static void sellAddOn(Player player, String regionName, AddOn addOn) {
@@ -996,21 +1070,21 @@ public class RegionOwnCommand implements CommandExecutor {
             player.sendMessage(RegionOwnMessages.regionNotFound.replace("<name>", regionName));
             return;
         }
-        
+
         //Cancel if the Player already has the Add-on
         if (!region.hasAddOn(addOn)) {
             player.sendMessage("§4You already have that Add-on disabled");
             return;
         }
-        
+
         Econ.refund(player, Econ.getSellPrice(addOn));
         region.setAddOn(player, addOn, false);
         region.save();
     }
-    
+
     /**
      * Removes ownership of the specified Region
-     * 
+     *
      * @param player The Player selling the Region
      */
     public static void sell(Player player, String regionName) {
@@ -1019,15 +1093,15 @@ public class RegionOwnCommand implements CommandExecutor {
             player.sendMessage(RegionOwnMessages.permission);
             return;
         }
-        
+
         Region region = regionName == null ? RegionOwn.findRegion(player.getLocation()) : RegionOwn.findRegion(regionName);
         if (region == null) {
             player.sendMessage(RegionOwnMessages.regionNotFound.replace("<name>", regionName));
             return;
         }
-        
+
         String name = player.getName();
-        
+
         //Allow Admins to sell a Region owned by someone else
         if (!region.isOwner(name)) {
             if (RegionOwn.hasPermission(player, "admin")) {
@@ -1039,13 +1113,13 @@ public class RegionOwnCommand implements CommandExecutor {
         } else {
             Econ.sell(player, region);
         }
-        
+
         RegionOwn.removeRegion(region);
     }
-    
+
     /**
      * Display to the Player all of the Add-ons for the Region
-     * 
+     *
      * @param player The Player requesting the list
      */
     public static void listAddOns(Player player, String regionName) {
@@ -1054,7 +1128,7 @@ public class RegionOwnCommand implements CommandExecutor {
             player.sendMessage(RegionOwnMessages.regionNotFound.replace("<name>", regionName));
             return;
         }
-        
+
         String list = "§5Enabled Add-ons§f: ";
         if (Econ.blockPvP != -2 && region.blockPvP) {
             list = list.concat("§6BlockPvP§f, ");
@@ -1086,14 +1160,14 @@ public class RegionOwnCommand implements CommandExecutor {
         if (Econ.feed != -2 && region.feed) {
             list = list.concat("§6Feed§f, ");
         }
-        
+
         player.sendMessage(list.substring(0, list.length()-2));
     }
-    
+
     /**
      * Display to the Player the info of the current Region
      * Info displayed is the Location, Owner, size, and current Co-owners
-     * 
+     *
      * @param player The Player requesting the info
      */
     public static void info(Player player, String regionName) {
@@ -1102,7 +1176,7 @@ public class RegionOwnCommand implements CommandExecutor {
             player.sendMessage(RegionOwnMessages.permission);
             return;
         }
-        
+
         Region region = regionName == null ? RegionOwn.findRegion(player.getLocation()) : RegionOwn.findRegion(regionName);
         if (region == null) {
             player.sendMessage(RegionOwnMessages.regionNotFound.replace("<name>", regionName));
@@ -1128,10 +1202,10 @@ public class RegionOwnCommand implements CommandExecutor {
         }
         player.sendMessage(groups.substring(0, groups.length() - 2));
     }
-    
+
     /**
      * Manages Co-ownership of the given Region/RegionOwner
-     * 
+     *
      * @param player The given Player who may be the Owner
      * @param regionName The name of the Region
      * @param type The given type: 'player' or 'group'
@@ -1144,7 +1218,7 @@ public class RegionOwnCommand implements CommandExecutor {
             player.sendMessage(RegionOwnMessages.permission);
             return;
         }
-        
+
         Region region = regionName == null ? RegionOwn.findRegion(player.getLocation()) : RegionOwn.findRegion(regionName);
         if (region == null) {
             player.sendMessage(RegionOwnMessages.regionNotFound.replace("<name>", regionName));
@@ -1165,7 +1239,7 @@ public class RegionOwnCommand implements CommandExecutor {
                     player.sendMessage("§6" + coOwner + "§4 is already a Co-owner");
                     return;
                 }
-                
+
                 region.coOwners.add(coOwner);
                 player.sendMessage("§4" + coOwner + "§5 added as a Co-owner");
             } else if (action.equals("remove")) {
@@ -1181,7 +1255,7 @@ public class RegionOwnCommand implements CommandExecutor {
                     player.sendMessage("§6" + coOwner + "§4 is already a Co-owner");
                     return;
                 }
-                
+
                 region.groups.add(coOwner);
                 player.sendMessage("§6" + coOwner + "§5 added as a Co-owner");
             } else if (action.equals("remove")) {
@@ -1194,13 +1268,13 @@ public class RegionOwnCommand implements CommandExecutor {
             sendHelp(player);
             return;
         }
-        
+
         region.save();
     }
-    
+
     /**
      * Manages Co-ownership of the given Region/RegionOwner
-     * 
+     *
      * @param player The given Player who may be the Owner
      * @param type The given type: 'player' or 'group'
      * @param action The given action: 'add' or 'remove'
@@ -1212,7 +1286,7 @@ public class RegionOwnCommand implements CommandExecutor {
             player.sendMessage(RegionOwnMessages.permission);
             return;
         }
-        
+
         RegionOwner owner = RegionOwn.getOwner(player.getName());
 
         //Determine the command to execute
@@ -1223,7 +1297,7 @@ public class RegionOwnCommand implements CommandExecutor {
                     player.sendMessage("§6" + coOwner + "§4 is already a Co-owner");
                     return;
                 }
-                
+
                 owner.coOwners.add(coOwner);
                 player.sendMessage("§6" + coOwner + "§5 added as a Co-owner");
             } else if (action.equals("remove")) {
@@ -1239,7 +1313,7 @@ public class RegionOwnCommand implements CommandExecutor {
                     player.sendMessage("§6" + coOwner + "§4 is already a Co-owner");
                     return;
                 }
-                
+
                 owner.groups.add(coOwner);
                 player.sendMessage("§6" + coOwner + "§5 added as a Co-owner");
             } else if (action.equals("remove")) {
@@ -1252,41 +1326,41 @@ public class RegionOwnCommand implements CommandExecutor {
             sendHelp(player);
             return;
         }
-        
+
         owner.save();
     }
-    
+
     /**
      * Removes all the Regions that are owned by the given Player
-     * 
+     *
      * @param player The given Player
      */
     public static void sellAll(Player player) {
         sellAll(player, player.getName());
     }
-    
+
     /**
      * Removes all the Regions that are owned by the given Player
-     * 
+     *
      * @param player The name of the given Player
      */
     public static void sellAll(String player) {
         sellAll(null, player);
     }
-    
+
     /**
      * Removes all the Region that are owned by the given Player
-     * 
+     *
      * @param player The Admin who is selling the Regions
      * @param player The name of the given Player
      */
     private static void sellAll(Player player, String name) {
         Iterator<Region> itr = RegionOwn.getOwnedRegions(name).iterator();
         LinkedList<Region> toRemove = new LinkedList<Region>();
-        
+
         while (itr.hasNext()) {
             Region region = itr.next();
-            
+
             //Sell the Chunk if it is owned by the given Player
             if (region.isOwner(name)) {
                 if (player == null) {
@@ -1298,15 +1372,15 @@ public class RegionOwnCommand implements CommandExecutor {
                 toRemove.add(region);
             }
         }
-        
+
         for (Region region: toRemove) {
             RegionOwn.removeRegion(region);
         }
-        
+
         RegionOwner owner = RegionOwn.findOwner(name);
         owner.save();
     }
-    
+
     /**
      * Displays the RegionOwn Main Help Page to the given Player
      *
@@ -1320,27 +1394,34 @@ public class RegionOwnCommand implements CommandExecutor {
         if (RegionOwn.hasPermission(player, "tools")) {
             player.sendMessage("§2/"+command+" help tools §f=§b View a list of Region Tools");
         }
-        player.sendMessage("§2/"+command+" select §f[§6Name§f] =§b Select the specified Region");
+        player.sendMessage("§2/"+command+" select §f<§6Name§f> =§b Select the specified Region");
         player.sendMessage("§2/"+command+" select §f=§b Start selection of a new Region");
+        if (RegionOwn.hasPermission(player, "selectbiome")) {
+            player.sendMessage("§2/"+command+" select biome §f=§b Select the entire Biome you are in");
+        }
         player.sendMessage("§2/"+command+" done §f=§b Finish selecting a Region");
         player.sendMessage("§2/"+command+" expand §f=§b Expand the selected Region to your y-coord");
         if (RegionOwn.hasPermission(player, "save")) {
-            player.sendMessage("§2/"+command+" save §f[§6Name§f] =§b Save the selected Region");
+            player.sendMessage("§2/"+command+" save §f<§6Name§f> =§b Save the selected Region");
+        }
+        if (RegionOwn.hasPermission(player, "mobregion")) {
+            player.sendMessage("§2/"+command+" mobregion <add|remove> <RegionName>§b Save the selected Region for region based mob loot");
+            player.sendMessage("§2/"+command+" mobregion list§b List all Mob Regions");
         }
         if (RegionOwn.hasPermission(player, "backup")) {
-            player.sendMessage("§2/"+command+" backup §f(§6Name§f) [§6File§f] =§b Backup the specified Region");
+            player.sendMessage("§2/"+command+" backup §f[§6Name§f] <§6File§f> =§b Backup the specified Region");
         }
         if (RegionOwn.hasPermission(player, "revert")) {
-            player.sendMessage("§2/"+command+" revert §f(§6Name§f) [§6File§f] =§b Revert the specified Region");
+            player.sendMessage("§2/"+command+" revert §f[§6Name§f] <§6File§f> =§b Revert the specified Region");
             player.sendMessage("§2/"+command+" undo §f=§b Undo your last modification");
-            player.sendMessage("§2/"+command+" undo §f[§6Name§f] =§b Undo the last reversion of the Region");
+            player.sendMessage("§2/"+command+" undo §f<§6Name§f> =§b Undo the last reversion of the Region");
         }
-        player.sendMessage("§2/"+command+" buy §f[§6Name§f] =§b Purchase the selected Region");
-        player.sendMessage("§2/"+command+" sell §f(§6Name§f) =§b Sell the specified Region");
+        player.sendMessage("§2/"+command+" buy §f<§6Name§f> =§b Purchase the selected Region");
+        player.sendMessage("§2/"+command+" sell §f[§6Name§f] =§b Sell the specified Region");
         player.sendMessage("§2/"+command+" list §f=§b List the Regions that you own");
         player.sendMessage("§2/"+command+" sellall §f=§b Sell all owned Regions");
     }
-    
+
     /**
      * Displays the Modify Region Help Page to the given Player
      *
@@ -1350,19 +1431,19 @@ public class RegionOwnCommand implements CommandExecutor {
         player.sendMessage("§e     Modify Region Help Page:");
         player.sendMessage("§5If the §6Name§5 is not specified, the current Region will be used");
         player.sendMessage("§2/"+command+" help addons §f=§b Display the Region Add-on Help Page");
-        player.sendMessage("§2/"+command+" name §f(§6Name§f) §f[§6NewName§f] =§b Rename the specified Region");
+        player.sendMessage("§2/"+command+" name §f[§6Name§f] §f<§6NewName§f> =§b Rename the specified Region");
         if (RegionOwn.hasPermission(player, "info")) {
-            player.sendMessage("§2/"+command+" info §f(§6Name§f) =§b List Owner and Co-owners of the specified Region");
+            player.sendMessage("§2/"+command+" info §f[§6Name§f] =§b List Owner and Co-owners of the specified Region");
         }
         if (RegionOwn.hasPermission(player, "coowner")) {
-            player.sendMessage("§2/"+command+" coowner §f(§6Name§f) [§6Action§f] [§6Type§f] [§6Co-owner§f] =§b Co-owner for specified Region");
-            player.sendMessage("§2/"+command+" coowner all §f[§6Action§f] [§6Type§f] [§6Name§f] =§b Co-owner for all Regions");
+            player.sendMessage("§2/"+command+" coowner §f[§6Name§f] <§6Action§f> <§6Type§f> <§6Co-owner§f> =§b Co-owner for specified Region");
+            player.sendMessage("§2/"+command+" coowner all §f<§6Action§f> <§6Type§f> <§6Name§f> =§b Co-owner for all Regions");
             player.sendMessage("§6Action§f = 'add§f' or §f'remove§f'");
             player.sendMessage("§6Type§f = 'player§f' or §f'group§f'");
             player.sendMessage("§6Name§f = The group name or the Player's name");
         }
     }
-    
+
     /**
      * Displays the Region Tools Help Page to the given Player
      *
@@ -1370,18 +1451,18 @@ public class RegionOwnCommand implements CommandExecutor {
      */
     public static void sendToolsHelp(Player player) {
         player.sendMessage("§e     Region Tools Help Page:");
-        player.sendMessage("§2/"+command+" biome §f[§6Biome§f] =§b Set the Biome of the selected Region");
+        player.sendMessage("§2/"+command+" biome §f<§6Biome§f> =§b Set the Biome of the selected Region");
         player.sendMessage("§2/"+command+" cut §f=§b Remove all foilage from the selected Region");
         player.sendMessage("§2/"+command+" thaw §f=§b Remove all snow/ice from the selected Region");
-        player.sendMessage("§2/"+command+" clear §f(§6Material§f) (§6Material§f) etc. =§b Remove all of the specified Materials");
+        player.sendMessage("§2/"+command+" clear §f[§6Material§f] [§6Material§f] etc. =§b Remove all of the specified Materials");
         player.sendMessage("§2/"+command+" clear all §f=§b Remove all Materials in your selection");
-        player.sendMessage("§2/"+command+" replace §f[§6Material,Material,Material etc§f] [§6NewMaterial§f] =§b Replace all of a specified Materials");
+        player.sendMessage("§2/"+command+" replace §f<§6Material,Material,Material etc§f> <§6NewMaterial§f> =§b Replace all of a specified Materials");
         player.sendMessage("§2/"+command+" grow §f=§b Change surface Dirt to Grass");
         player.sendMessage("§2/"+command+" fill §f=§b Fill the bottom layer of the selected Region with water");
-        player.sendMessage("§2/"+command+" fill §f[§6Material§f] =§b Fill the selected Region with the specified Material");
+        player.sendMessage("§2/"+command+" fill §f<§6Material§f> =§b Fill the selected Region with the specified Material");
         player.sendMessage("§6Material§5 may be the Item ID or it's name");
     }
-    
+
     /**
      * Displays the Add-on Help Page to the given Player
      *
@@ -1390,43 +1471,43 @@ public class RegionOwnCommand implements CommandExecutor {
     public static void sendAddOnHelp(Player player) {
         player.sendMessage("§e     Region Add-on Help Page:");
         player.sendMessage("§5If the §6RegionName§5 is not specified, the current Region will be used");
-        player.sendMessage("§2/"+command+" list addons §f(RegionName§f) =§b List your current add-ons");
-        
+        player.sendMessage("§2/"+command+" list addons §f[RegionName§f] =§b List your current add-ons");
+
         //Display available Add-ons
         if (RegionOwn.hasPermission(player, AddOn.BLOCKPVP)) {
-            player.sendMessage("§2/"+command+" buy §f(§6RegionName§f)§2 blockpvp §f=§b No damage from Players: §6"+Econ.format(Econ.getBuyPrice(AddOn.BLOCKPVP)));
+            player.sendMessage("§2/"+command+" buy §f[§6RegionName§f]§2 blockpvp §f=§b No damage from Players: §6"+Econ.format(Econ.getBuyPrice(AddOn.BLOCKPVP)));
         }
         if (RegionOwn.hasPermission(player, AddOn.BLOCKPVE)) {
-            player.sendMessage("§2/"+command+" buy §f(§6RegionName§f)§2 blockpve §f=§b No damage from Mobs: §6"+Econ.format(Econ.getBuyPrice(AddOn.BLOCKPVE)));
+            player.sendMessage("§2/"+command+" buy §f[§6RegionName§f]§2 blockpve §f=§b No damage from Mobs: §6"+Econ.format(Econ.getBuyPrice(AddOn.BLOCKPVE)));
         }
         if (RegionOwn.hasPermission(player, AddOn.BLOCKEXPLOSIONS)) {
-            player.sendMessage("§2/"+command+" buy §f(§6RegionName§f)§2 blockexplosions §f=§b No TNT/Creeper griefing: §6"+Econ.format(Econ.getBuyPrice(AddOn.BLOCKEXPLOSIONS)));
+            player.sendMessage("§2/"+command+" buy §f[§6RegionName§f]§2 blockexplosions §f=§b No TNT/Creeper griefing: §6"+Econ.format(Econ.getBuyPrice(AddOn.BLOCKEXPLOSIONS)));
         }
         if (RegionOwn.hasPermission(player, AddOn.LOCKCHESTS)) {
-            player.sendMessage("§2/"+command+" buy §f(§6RegionName§f)§2 lockchests §f=§b Non-Owners can't open Chests/Furnaces/Dispensers: §6"+Econ.format(Econ.getBuyPrice(AddOn.LOCKCHESTS)));
+            player.sendMessage("§2/"+command+" buy §f[§6RegionName§f]§2 lockchests §f=§b Non-Owners can't open Chests/Furnaces/Dispensers: §6"+Econ.format(Econ.getBuyPrice(AddOn.LOCKCHESTS)));
         }
         if (RegionOwn.hasPermission(player, AddOn.LOCKDOORS)) {
-            player.sendMessage("§2/"+command+" buy §f(§6RegionName§f)§2 lockdoors §f=§b Non-Owners can't open Doors: §6"+Econ.format(Econ.getBuyPrice(AddOn.LOCKDOORS)));
+            player.sendMessage("§2/"+command+" buy §f[§6RegionName§f]§2 lockdoors §f=§b Non-Owners can't open Doors: §6"+Econ.format(Econ.getBuyPrice(AddOn.LOCKDOORS)));
         }
         if (RegionOwn.hasPermission(player, AddOn.DISABLEBUTTONS)) {
-            player.sendMessage("§2/"+command+" buy §f(§6RegionName§f)§2 disablebuttons §f=§b Non-Owners can't use Buttons/Levers/Plates: §6"+Econ.format(Econ.getBuyPrice(AddOn.DISABLEBUTTONS)));
+            player.sendMessage("§2/"+command+" buy §f[§6RegionName§f]§2 disablebuttons §f=§b Non-Owners can't use Buttons/Levers/Plates: §6"+Econ.format(Econ.getBuyPrice(AddOn.DISABLEBUTTONS)));
         }
         if (RegionOwn.hasPermission(player, AddOn.DENYACCESS)) {
-            player.sendMessage("§2/"+command+" buy §f(§6RegionName§f)§2 denyaccess §f=§b Players cannot enter your land: §6"+Econ.format(Econ.getBuyPrice(AddOn.DENYACCESS)));
+            player.sendMessage("§2/"+command+" buy §f[§6RegionName§f]§2 denyaccess §f=§b Players cannot enter your land: §6"+Econ.format(Econ.getBuyPrice(AddOn.DENYACCESS)));
         }
         if (RegionOwn.hasPermission(player, AddOn.DISABLEPISTONS)) {
-            player.sendMessage("§2/"+command+" buy §f(§6RegionName§f)§2 disablepistons §f=§b Pistons will no longer function: §6"+Econ.format(Econ.getBuyPrice(AddOn.DISABLEPISTONS)));
+            player.sendMessage("§2/"+command+" buy §f[§6RegionName§f]§2 disablepistons §f=§b Pistons will no longer function: §6"+Econ.format(Econ.getBuyPrice(AddOn.DISABLEPISTONS)));
         }
         if (RegionOwn.hasPermission(player, AddOn.ALARM)) {
-            player.sendMessage("§2/"+command+" buy §f(§6RegionName§f)§2 alarm §f=§b Be alerted when a Player enters your land: §6"+Econ.format(Econ.getBuyPrice(AddOn.ALARM)));
+            player.sendMessage("§2/"+command+" buy §f[§6RegionName§f]§2 alarm §f=§b Be alerted when a Player enters your land: §6"+Econ.format(Econ.getBuyPrice(AddOn.ALARM)));
         }
         if (RegionOwn.hasPermission(player, AddOn.HEAL)) {
-            player.sendMessage("§2/"+command+" buy §f(§6RegionName§f)§2 heal §f=§b Players gain half a heart every §6"+RegionOwnMovementListener.rate+"§b seconds: §6"+Econ.format(Econ.getBuyPrice(AddOn.HEAL)));
+            player.sendMessage("§2/"+command+" buy §f[§6RegionName§f]§2 heal §f=§b Players gain half a heart every §6"+RegionOwnMovementListener.rate+"§b seconds: §6"+Econ.format(Econ.getBuyPrice(AddOn.HEAL)));
         }
         if (RegionOwn.hasPermission(player, AddOn.FEED)) {
-            player.sendMessage("§2/"+command+" buy §f(§6RegionName§f)§2 feed §f=§b Players gain half a food every §6"+RegionOwnMovementListener.rate+"§b seconds: §6"+Econ.format(Econ.getBuyPrice(AddOn.FEED)));
+            player.sendMessage("§2/"+command+" buy §f[§6RegionName§f]§2 feed §f=§b Players gain half a food every §6"+RegionOwnMovementListener.rate+"§b seconds: §6"+Econ.format(Econ.getBuyPrice(AddOn.FEED)));
         }
-        
-        player.sendMessage("§2/"+command+" sell §f(§6RegionName§f) [§6addon§f] =§b Sell an addon for §6"+Econ.moneyBack+"%§b of its buy price");
+
+        player.sendMessage("§2/"+command+" sell §f[§6RegionName§f] <§6addon§f> =§b Sell an addon for §6"+Econ.moneyBack+"%§b of its buy price");
     }
 }

@@ -10,11 +10,11 @@ import org.bukkit.event.block.BlockPistonRetractEvent;
 
 /**
  * Block Pistons within Owned Regions which have protection
- * 
+ *
  * @author Codisimus
  */
 public class RegionOwnPistonListener implements Listener {
-    @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    @EventHandler (ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onPistonExtend(BlockPistonExtendEvent event) {
         List<Block> blocks = event.getBlocks();
         for (Block block: blocks) {
@@ -24,7 +24,7 @@ public class RegionOwnPistonListener implements Listener {
                 return;
             }
         }
-        
+
         int size = blocks.size();
         if (size != 0) {
             Region region = RegionOwn.findRegion(blocks.get(size - 1).getRelative(event.getDirection()).getLocation());
@@ -33,8 +33,8 @@ public class RegionOwnPistonListener implements Listener {
             }
         }
     }
-    
-    @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
+
+    @EventHandler (ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onPistonRetract(BlockPistonRetractEvent event) {
         if (event.isSticky()) {
             Region region = RegionOwn.findRegion(event.getBlock().getRelative(event.getDirection(), 2).getLocation());

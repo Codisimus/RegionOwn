@@ -13,7 +13,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
  * @author Codisimus
  */
 public class RegionOwnInteractionListener implements Listener {
-    @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    @EventHandler (ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onPlayerInteract(PlayerInteractEvent event) {
         //Return if the Event was arm flailing
         Action action = event.getAction();
@@ -58,6 +58,8 @@ public class RegionOwnInteractionListener implements Listener {
                 return;
             }
             //Fall through
+        case TRAP_DOOR:
+        case FENCE_GATE:
         case WOOD_DOOR: //Fall through
         case WOODEN_DOOR:
             //Return if the Event was not opening the Door

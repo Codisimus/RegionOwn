@@ -3,6 +3,7 @@ package com.codisimus.plugins.regionown;
 import java.awt.Polygon;
 import java.io.*;
 import java.util.BitSet;
+import java.util.HashSet;
 import java.util.LinkedList;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -11,7 +12,7 @@ import org.bukkit.entity.Player;
 
 /**
  * A Region is an area of land that is defined by an outlining Polygon.
- * A Ragion is bounded by 2 y-coordinates
+ * A Region is bounded by 2 y-coordinates
  * If Owner is null then the Region is only used for backing up and reverting
  *
  * @author Codisimus
@@ -79,6 +80,28 @@ public class Region {
     }
 
     /**
+     * Creates a new Region from the given data (for use from a save file)
+     *
+     * @param coords An Array of int in the order x1,z1,x2,z2,y1,y2
+     * @param bitSet The BitSet of included Blocks
+     */
+    public Region(String name, int[] coords, BitSet bitSet) {
+        this.name = name;
+        this.bitSet = bitSet;
+
+        x1 = coords[0];
+        z1 = coords[1];
+        x2 = coords[2];
+        z2 = coords[3];
+        y1 = coords[4];
+        y2 = coords[5];
+
+        width = x2 - x1 + 1;
+        length = z2 - z1 + 1;
+        height = y2 - y1 + 1;
+    }
+
+    /**
      * Creates a Region from the given Cubiod corners
      *
      * @param a One corner of the Cubiod
@@ -105,7 +128,7 @@ public class Region {
     /**
      * Creates a Region from the given Region corners that form a Polygon
      *
-     * @param blocks An array of Blocks (The first and last Blocks may match)
+     * @param blocks An List of Blocks (The first and last Blocks may match)
      */
     public Region(LinkedList<Block> blocks) {
         Block firstBlock = blocks.getFirst();
@@ -160,6 +183,62 @@ public class Region {
                 if (polygon.contains(x, z) || polygon.contains(x - 1, z)
                         || polygon.contains(x, z - 1)
                         || polygon.contains(x - 1, z - 1)) {
+                    bitSet.set(index, true);
+                }
+                index++;
+            }
+        }
+    }
+
+    /**
+     * Creates a Region from the given Blocks that the Region will contain
+     *
+     * @param blocks A set of Blocks
+     */
+    public Region(HashSet<Block> blockSet) {
+        LinkedList<Block> blocks = new LinkedList(blockSet);
+        Block firstBlock = blocks.getFirst();
+        World w = firstBlock.getWorld();
+        world = w.getName();
+
+        x1 = x2 = firstBlock.getX();
+        z1 = z2 = firstBlock.getZ();
+        y1 = y2 = firstBlock.getY();
+
+        for (Block block: blocks) {
+            int x = block.getX();
+            int y = block.getY();
+            int z = block.getZ();
+
+            if (x < x1) {
+                x1 = x;
+            }
+            if (x > x2) {
+                x2 = x;
+            }
+            if (y < y1) {
+                y1 = y;
+            }
+            if (y > y2) {
+                y2 = y;
+            }
+            if (z < z1) {
+                z1 = z;
+            }
+            if (z > z2) {
+                z2 = z;
+            }
+        }
+
+        width = x2 - x1 + 1;
+        length = z2 - z1 + 1;
+        height = y2 - y1 + 1;
+
+        //Construct the BitSet for the Polygon
+        int index = 0;
+        for (int x = x1; x <= x2; x++) {
+            for (int z = z1; z <= z2; z++) {
+                if (blockSet.contains(w.getBlockAt(x, y1, z))) {
                     bitSet.set(index, true);
                 }
                 index++;
@@ -697,6 +776,12 @@ public class Region {
         intArray[4] = y1;
         intArray[5] = y2;
         return intArray;
+    }
+
+    public Region clone(String worldName) {
+        Region clone = new Region(name, toIntArray(), bitSet);
+        clone.world = worldName;
+        return clone;
     }
 
     @Override

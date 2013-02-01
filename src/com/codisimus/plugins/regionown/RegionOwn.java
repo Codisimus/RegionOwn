@@ -32,11 +32,13 @@ public class RegionOwn extends JavaPlugin {
     static Plugin plugin;
     private static Properties p;
     private static HashMap<String, Region> regions = new HashMap<String, Region>();
+    public static HashMap<String, Region> mobRegions = new HashMap<String, Region>();
     private static HashMap<String, Region> ownedRegions = new HashMap<String, Region>();
     private static HashMap<String, RegionOwner> regionOwners = new HashMap<String, RegionOwner>();
     private static int disownTime;
     private static LinkedList<World> worlds = new LinkedList<World>();
     private static boolean autoRevert;
+    private static boolean regionChat;
 
     /**
      * Calls methods to load this Plugin when it is enabled
@@ -114,6 +116,9 @@ public class RegionOwn extends JavaPlugin {
         pm.registerEvents(new RegionOwnMovementListener(), this);
         if (autoRevert) {
             pm.registerEvents(new RegionOwnLoggerListener(), this);
+        }
+        if (regionChat) {
+            pm.registerEvents(new RegionOwnChatListener(), this);
         }
         if (Econ.blockPvP != -2 || Econ.blockPvE != -2) {
             pm.registerEvents(new RegionOwnDamageListener(), this);
@@ -208,23 +213,13 @@ public class RegionOwn extends JavaPlugin {
             autoRevert = Boolean.parseBoolean(loadValue("AutoRevertRegions"));
             RegionOwnMovementListener.rate = Integer.parseInt(loadValue("RegenerateRate"));
             RegionOwnMovementListener.amount = Integer.parseInt(loadValue("RegenerateAmount"));
+            regionChat = Boolean.parseBoolean(loadValue("RegionBasedChat"));
 
             RegionOwnCommand.clearIDs = EnumSet.noneOf(Material.class);
             String[] ids = loadValue("ClearIDs").split(" ");
             for (String id: ids) {
                 RegionOwnCommand.clearIDs.add(Material.matchMaterial(id));
             }
-
-            RegionOwnCommand.nonOpaques = EnumSet.of(Material.AIR, Material.SAPLING, Material.LEAVES, Material.GLASS,
-            Material.POWERED_RAIL, Material.DETECTOR_RAIL, Material.WEB, Material.LONG_GRASS, Material.DEAD_BUSH,
-            Material.PISTON_EXTENSION, Material.PISTON_MOVING_PIECE, Material.YELLOW_FLOWER, Material.RED_ROSE,
-            Material.BROWN_MUSHROOM, Material.TORCH, Material.FIRE, Material.REDSTONE_WIRE, Material.CROPS,
-            Material.SIGN_POST, Material.WOODEN_DOOR, Material.LADDER, Material.RAILS, Material.WALL_SIGN,
-            Material.LEVER, Material.STONE_PLATE, Material.IRON_DOOR_BLOCK, Material.WOOD_PLATE,
-            Material.REDSTONE_TORCH_OFF, Material.REDSTONE_TORCH_ON, Material.STONE_BUTTON, Material.CACTUS,
-            Material.SUGAR_CANE_BLOCK, Material.FENCE, Material.PORTAL, Material.CAKE_BLOCK, Material.DIODE_BLOCK_OFF,
-            Material.DIODE_BLOCK_ON, Material.TRAP_DOOR, Material.IRON_FENCE, Material.THIN_GLASS, Material.PUMPKIN_STEM,
-            Material.MELON_STEM, Material.VINE, Material.FENCE_GATE, Material.WATER_LILY, Material.NETHER_FENCE, Material.NETHER_WARTS);
 
             String data = loadValue("EnabledOnlyInWorlds");
             if (!data.isEmpty()) {
@@ -342,6 +337,8 @@ public class RegionOwn extends JavaPlugin {
 
                     if (region.owner == null) {
                         regions.put(region.name, region);
+                    } else if (region.owner.equals("PhatLoots")) {
+                        mobRegions.put(region.name, region);
                     } else {
                         ownedRegions.put(region.name, region);
                     }
@@ -378,12 +375,12 @@ public class RegionOwn extends JavaPlugin {
 
                     //Convert the coOwners data into a LinkedList for the ChunkOwner
                     String data = p.getProperty("Co-owners");
-                    if (!data.equals("none")) 
+                    if (!data.equals("none"))
                         owner.coOwners = new LinkedList<String>(Arrays.asList(data.split(",")));
 
                     //Convert the groups data into a LinkedList for the ChunkOwner
                     data = p.getProperty("Groups");
-                    if (!data.equals("none")) 
+                    if (!data.equals("none"))
                         owner.groups = new LinkedList<String>(Arrays.asList(data.split(",")));
 
                     regionOwners.put(owner.name, owner);
@@ -400,7 +397,7 @@ public class RegionOwn extends JavaPlugin {
             }
         }
     }
-    
+
     /**
      * Loads last seen data from file
      */
@@ -643,7 +640,7 @@ public class RegionOwn extends JavaPlugin {
     }
 
     /**
-     * Returns true if the given Player has permission to buy the given Add-on 
+     * Returns true if the given Player has permission to buy the given Add-on
      *
      * @param player The Player who is being checked for permission
      * @param addOn The given Add-on
@@ -703,7 +700,7 @@ public class RegionOwn extends JavaPlugin {
     /**
      * Returns the Region which contains the given Location
      * returns null if no Region was found
-     * 
+     *
      * @param block The Location that may be in a Region
      */
     public static Region findRegion(Location location) {
@@ -730,7 +727,7 @@ public class RegionOwn extends JavaPlugin {
     /**
      * Returns the RegionOwner object for the given Player
      * A new RegionOwner is created if one does not exist
-     * 
+     *
      * @param player The name of the Player
      * @return The RegionOwner for the given Player
      */

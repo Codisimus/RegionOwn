@@ -10,6 +10,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.ItemSpawnEvent;
+import org.bukkit.event.hanging.HangingBreakByEntityEvent;
+import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.painting.PaintingBreakByEntityEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
@@ -19,14 +21,14 @@ import org.bukkit.event.vehicle.VehicleDestroyEvent;
 
 /**
  * Listens for griefing events
- * 
+ *
  * @author Codisimus
  */
 public class RegionOwnListener implements Listener {
     /* Anti-Drop while reverting */
     static LinkedList<Region> reverting = new LinkedList<Region>();
-    
-    @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
+
+    @EventHandler (ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onItemSpawn(ItemSpawnEvent event) {
         Location location = event.getLocation();
         for (Region region: reverting) {
@@ -35,28 +37,28 @@ public class RegionOwnListener implements Listener {
             }
         }
     }
-    
-    
+
+
     /* Building/Griefing Events */
-    
+
     /**
      * Blocks can only be placed within a Region by the Owner, a Co-owner, or an Admin
-     * 
+     *
      * @param event The BlockPlaceEvent that occurred
      */
-    @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    @EventHandler (ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onBlockPlace(BlockPlaceEvent event) {
         if (!RegionOwn.canBuild(event.getPlayer(), event.getBlock())) {
             event.setCancelled(true);
         }
     }
-    
+
     /**
      * Blocks within a Region can only be broken by the Owner, a Co-owner, or an Admin
-     * 
+     *
      * @param event The BlockBreakEvent that occurred
      */
-    @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    @EventHandler (ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onBlockBreak(BlockBreakEvent event) {
         if (!RegionOwn.canBuild(event.getPlayer(), event.getBlock())) {
             event.setCancelled(true);
@@ -65,10 +67,10 @@ public class RegionOwnListener implements Listener {
 
     /**
      * Signs within a Region can only be changed by the Owner, a Co-owner, or an Admin
-     * 
+     *
      * @param event The SignChangeEvent that occurred
      */
-    @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    @EventHandler (ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onSignChange(SignChangeEvent event) {
         if (!RegionOwn.canBuild(event.getPlayer(), event.getBlock())) {
             event.setCancelled(true);
@@ -77,22 +79,22 @@ public class RegionOwnListener implements Listener {
 
     /**
      * Blocks within a Region can only be ignited by the Owner, a Co-owner, or an Admin
-     * 
+     *
      * @param event The BlockIgniteEvent that occurred
      */
-    @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    @EventHandler (ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onBlockIgnite(BlockIgniteEvent event) {
         if (!RegionOwn.canBuild(event.getPlayer(), event.getBlock())) {
             event.setCancelled(true);
         }
     }
-    
+
     /**
      * Fire cannot spread within an OwnedChunk
-     * 
+     *
      * @param event The BlockSpreadEvent that occurred
      */
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onBlockSpread(BlockSpreadEvent event) {
         if (event.getSource().getType() == Material.FIRE && !RegionOwn.canBuild(null, event.getBlock())) {
             event.setCancelled(true);
@@ -101,10 +103,10 @@ public class RegionOwnListener implements Listener {
 
     /**
      * Blocks within an OwnedChunk cannot burn
-     * 
+     *
      * @param event The BlockBurnEvent that occurred
      */
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onBlockBurn(BlockBurnEvent event) {
         if (!RegionOwn.canBuild(null, event.getBlock())) {
             event.setCancelled(true);
@@ -113,23 +115,23 @@ public class RegionOwnListener implements Listener {
 
     /**
      * Eggs within a Region can only be hatched by the Owner, a Co-owner, or an Admin
-     * 
+     *
      * @param event The PlayerEggThrowEvent that occurred
      */
-    @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    @EventHandler (ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onEggThrow(PlayerEggThrowEvent event) {
         Player player = event.getPlayer();
         if (!RegionOwn.canBuild(player, player.getTargetBlock(null, 10))) {
             event.setHatching(false);
         }
     }
-    
+
     /**
      * Buckets can only be emptied within a Region by the Owner, a Co-owner, or an Admin
-     * 
+     *
      * @param event The PlayerBucketEmptyEvent that occurred
      */
-    @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    @EventHandler (ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event) {
         if (!RegionOwn.canBuild(event.getPlayer(), event.getBlockClicked().getRelative(event.getBlockFace()))) {
             event.setCancelled(true);
@@ -138,47 +140,59 @@ public class RegionOwnListener implements Listener {
 
     /**
      * Buckets can only be filled within a Region by the Owner, a Co-owner, or an Admin
-     * 
+     *
      * @param event The PlayerBucketFillEvent that occurred
      */
-    @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    @EventHandler (ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onPlayerBucketFill(PlayerBucketFillEvent event) {
         if (!RegionOwn.canBuild(event.getPlayer(), event.getBlockClicked())) {
             event.setCancelled(true);
         }
     }
-    
+
     /**
-     * Paintings can only be broken within a Region by the Owner, a Co-owner, or an Admin
-     * 
-     * @param event The PaintingBreakByEntityEvent that occurred
+     * Hangings within a Region can only be broken by the Owner, a Co-Owner, or an Admin
+     *
+     * @param event The HangingBreakEvent that occurred
      */
-    @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
-    public void onPaintingBreak(PaintingBreakByEntityEvent event) {
+    @EventHandler (ignoreCancelled = true, priority = EventPriority.LOWEST)
+    public void onHangingBreak(HangingBreakEvent event) {
+        if (event.getCause() != HangingBreakEvent.RemoveCause.ENTITY) {
+            event.setCancelled(true);
+        }
+    }
+
+    /**
+     * Hangings within a Region can only be broken by the Owner, a Co-Owner, or an Admin
+     *
+     * @param event The HangingBreakByEntityEvent that occurred
+     */
+    @EventHandler (ignoreCancelled = true, priority = EventPriority.LOWEST)
+    public void onHangingBreak(HangingBreakByEntityEvent event) {
         Player player = null;
         Entity entity = event.getRemover();
         if (entity instanceof Player) {
             player = (Player) entity;
         }
-        
-        if (!RegionOwn.canBuild(player, event.getPainting().getLocation().getBlock())) {
+
+        if (!RegionOwn.canBuild(player, event.getEntity().getLocation().getBlock())) {
             event.setCancelled(true);
         }
     }
-    
+
     /**
      * Vehicles within a Region can only be damaged by the Owner, a Co-owner, or an Admin
-     * 
+     *
      * @param event The VehicleDamageEvent that occurred
      */
-    @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    @EventHandler (ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onVehicleDamage(VehicleDamageEvent event) {
         Player player = null;
         Entity entity = event.getAttacker();
         if (entity instanceof Player) {
             player = (Player) entity;
         }
-        
+
         if (!RegionOwn.canBuild(player, event.getVehicle().getLocation().getBlock())) {
             event.setCancelled(true);
         }
@@ -186,17 +200,17 @@ public class RegionOwnListener implements Listener {
 
     /**
      * Vehicles within a Region can only be destroyed by the Owner, a Co-owner, or an Admin
-     * 
+     *
      * @param event The VehicleDestroyEvent that occurred
      */
-    @EventHandler (ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    @EventHandler (ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onVehicleDestroy(VehicleDestroyEvent event) {
         Player player = null;
         Entity entity = event.getAttacker();
         if (entity instanceof Player) {
             player = (Player) entity;
         }
-        
+
         if (!RegionOwn.canBuild(player, event.getVehicle().getLocation().getBlock())) {
             event.setCancelled(true);
         }
