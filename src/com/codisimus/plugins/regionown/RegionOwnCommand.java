@@ -941,6 +941,7 @@ public class RegionOwnCommand implements CommandExecutor {
 
         Region region = RegionSelector.getSelection(player);
         region.name = name;
+        region.setOwner("PhatLoots");
 
         RegionOwn.mobRegions.put(name, region);
         player.sendMessage("§6" + name + "§5 has been removed as a Mob Region");

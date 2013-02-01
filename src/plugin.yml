@@ -1,6 +1,6 @@
 name: RegionOwn
 main: com.codisimus.plugins.regionown.RegionOwn
-version: 0.2.3
+version: 0.2.4
 author: Codisimus
 website: www.codisimus.com
 description: Area protection based on polygonal regions
